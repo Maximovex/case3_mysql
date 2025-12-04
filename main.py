@@ -1,17 +1,7 @@
 from fastapi import FastAPI,Depends
-from pydantic import BaseModel
-from database import Base, Tours, Customers, Orders, Managers, Hotels, Transportations,session
+from schemas import SToursAdd, STours
+from database import Base, Tours, Customers, Orders, Managers, Hotels, Transportations,async_sessionmaker,session
 
-class SToursAdd(BaseModel):
-    name: str
-    customer_id: int
-    transfer_id: int
-    hotels_id: int
-    transport_id: int
-    total_cost: int
-
-class STours(SToursAdd):
-    id: int
 
 app = FastAPI()
 
@@ -21,8 +11,10 @@ def read_tours():
     return tours
 
 @app.post("/tours/")
-async def create_tour(tour: SToursAdd=Depends()):
-    
+async def create_tour(data: SToursAdd=Depends()):
+    tour_dict=data.model_dump()
+    tour = Tours(**tour_dict)
     session.add(tour)
-    session.commit()
+    await session.flush()
+    await session.commit()
     return tour

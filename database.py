@@ -1,12 +1,12 @@
 
-from sqlalchemy.ext.asyncio import async_sessionmaker,create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker,create_async_engine,AsyncSession
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import DeclarativeBase
 from datetime import datetime
 
 
 engine = create_async_engine('mysql+aiomysql://root:f6d8lini@localhost:3306/world_travel', echo=True)
-AsyncSession=async_sessionmaker(bind=engine,expire_on_commit=False)
+AsyncSession=async_sessionmaker(bind=engine,expire_on_commit=False,class_=AsyncSession)
 session=AsyncSession()
 
 class Base(DeclarativeBase):

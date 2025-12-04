@@ -1,12 +1,13 @@
-from sqlalchemy import create_engine
+
+from sqlalchemy.ext.asyncio import async_sessionmaker,create_async_engine
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 
 
-engine = create_engine('mysql+pymysql://root:f6d8lini@localhost:3306/world_travel', echo=True)
-Session=sessionmaker(bind=engine)
-session=Session()
+engine = create_async_engine('mysql+aiomysql://root:f6d8lini@localhost:3306/world_travel', echo=True)
+AsyncSession=async_sessionmaker(bind=engine,expire_on_commit=False)
+session=AsyncSession()
 
 class Base(DeclarativeBase):
     pass
@@ -85,6 +86,3 @@ class Transportations(Base):
 
     def __repr__(self):
         return f"(id={self.id}, type={self.type}, company={self.company}, price={self.price})"
-
-all_tours=session.query(Tours).all()
-print(all_tours)

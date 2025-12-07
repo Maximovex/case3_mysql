@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="templates")
 
 app = FastAPI()
 
-@app.get("/")
+@app.get("/addtour")
 async def read_root(request: Request):
     async with new_session() as session:
         hotels = await session.execute(select(Hotels))
@@ -101,7 +101,7 @@ async def read_hotels():
             result.append(hotel_dict)
     return result
 
-@app.post("/tours/")
+@app.post("/tours-create/")
 async def create_tour(data: SToursAdd=Depends()):
     async with new_session() as session:
         tour_dict=data.model_dump()

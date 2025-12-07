@@ -62,9 +62,10 @@ async def read_tours():
 
 @app.post("/tours/")
 async def create_tour(data: SToursAdd=Depends()):
-    tour_dict=data.model_dump()
-    tour = Tours(**tour_dict)
-    session.add(tour)
-    await session.flush()
-    await session.commit()
+    async with new_session() as session:
+        tour_dict=data.model_dump()
+        tour = Tours(**tour_dict)
+        session.add(tour)
+        await session.flush()
+        await session.commit()
     return tour

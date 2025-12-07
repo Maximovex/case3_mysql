@@ -1,18 +1,19 @@
-from database import Base, Tours, Customers, Orders, Managers, Hotels, Transportations,session
+from database import Base, Tours, Customers, Orders, Managers, Hotels, Transportations,session,AsyncSession
 
-class ObjectCRUD:
-    @classmethod
-    async def create(cls):
-        async with session() as s:
-            new_tour = Tours(
-                name=tour.name,
-                customer_id=tour.customer_id,
-                transfer_id=tour.transfer_id,
-                hotels_id=tour.hotels_id,
-                transport_id=tour.transport_id,
-                total_cost=tour.total_cost
-            )
-            s.add(new_tour)
-            await s.commit()
-            await s.refresh(new_tour)
-            return new_tour.id 
+class TourCRUD:
+    def __init__(self, db_session:AsyncSession):
+        self.db_session = db_session
+
+    async def create_tour(self,name, customer_id=None, transfer_id=None, hotels_id=None, transport_id=None, total_cost=None)-> Tours:
+        
+        new_tour = Tours(
+            name=name,
+            customer_id=customer_id,
+            transfer_id=transfer_id,
+            hotels_id=hotels_id,
+            transport_id=transport_id,
+            total_cost=total_cost
+        )
+        self.db_session.add(new_tour)
+        await self.db_session.flush()
+        return new_tour

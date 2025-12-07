@@ -1,0 +1,1 @@
+MY_DATABASE_URL="mysql+aiomysql://root:f6d8lini@localhost:3306/world_travel"

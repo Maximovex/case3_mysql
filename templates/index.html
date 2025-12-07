@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour & Hotel Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Tour & Hotel Management</h1>
+        <p class="subtitle">Create a new tour with hotel accommodation</p>
+
+        <form id="tourForm">
+            <!-- Tour Information Section -->
+            <div class="form-section">
+                <div class="section-title">Tour Information</div>
+
+                <div class="form-group">
+                    <label for="tourName">Tour Name *</label>
+                    <input type="text" id="tourName" name="name" required placeholder="e.g., Paris City Tour">
+                </div>
+
+                <div class="form-group">
+                    <label for="tourDescription">Description</label>
+                    <textarea id="tourDescription" name="description" placeholder="Describe your tour..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transferId">Transfer ID</label>
+                        <input type="number" id="transferId" name="transfer_id" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label for="transportId">Transport ID</label>
+                        <input type="number" id="transportId" name="transport_id" placeholder="Optional">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="totalCost">Total Cost ($)</label>
+                    <input type="number" id="totalCost" name="total_cost" placeholder="0" step="0.01">
+                </div>
+            </div>
+
+            <!-- Hotel Information Section -->
+            <div class="form-section">
+                <div class="section-title">Hotel Information</div>
+
+                <div class="form-group">
+                    <label for="hotelId">Select Existing Hotel</label>
+                    <select id="hotelId" name="hotels_id">
+                        <option value="">-- Choose a hotel --</option>
+                        {% for hotel in hotels %}
+                            <option value="{{ hotel.id }}">{{ hotel.name }} - {{ hotel.location }} ({{ hotel.rating }}⭐)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <p style="text-align: center; color: #999; font-size: 12px; margin: 15px 0;">OR</p>
+
+                <div class="form-group">
+                    <label for="hotelName">Hotel Name</label>
+                    <input type="text" id="hotelName" placeholder="e.g., Luxury Hotel Paris">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hotelLocation">Location</label>
+                        <input type="text" id="hotelLocation" placeholder="e.g., Paris, France">
+                    </div>
+                    <div class="form-group">
+                        <label for="hotelRating">Rating (1-5)</label>
+                        <input type="number" id="hotelRating" min="1" max="5" placeholder="5">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hotelPrice">Price per Night ($)</label>
+                        <input type="number" id="hotelPrice" placeholder="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="hotelDescription">Hotel Description</label>
+                    <textarea id="hotelDescription" placeholder="Describe the hotel..."></textarea>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <button type="submit" class="btn-submit">Submit Tour</button>
+                <button type="reset" class="btn-reset">Clear Form</button>
+            </div>
+
+            <!-- Message -->
+            <div id="message" class="message"></div>
+        </form>
+    </div>
+
+    <script>
+        // Handle form submission
+        document.getElementById('tourForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const tourData = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                transfer_id: formData.get('transfer_id') ? parseInt(formData.get('transfer_id')) : null,
+                hotels_id: formData.get('hotels_id') ? parseInt(formData.get('hotels_id')) : null,
+                transport_id: formData.get('transport_id') ? parseInt(formData.get('transport_id')) : null,
+                total_cost: formData.get('total_cost') ? parseFloat(formData.get('total_cost')) : null
+            };
+
+            // Validate tour name
+            if (!tourData.name.trim()) {
+                showMessage('Tour name is required', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/tours/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(tourData)
+                });
+
+                if (response.ok) {
+                    showMessage('Tour created successfully! 🎉', 'success');
+                    e.target.reset();
+                    setTimeout(() => {
+                        document.getElementById('message').style.display = 'none';
+                    }, 5000);
+                } else {
+                    showMessage('Error creating tour. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+        }
+    </script>
+</body>
+</html>

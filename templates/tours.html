@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tours Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .tours-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .tour-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .tour-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .tour-header {
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .tour-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .tour-id {
+            font-size: 12px;
+            color: #999;
+            font-weight: 500;
+        }
+
+        .tour-description {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            min-height: 40px;
+        }
+
+        .tour-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .meta-item {
+            font-size: 12px;
+        }
+
+        .meta-label {
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .meta-value {
+            color: #333;
+            font-weight: 500;
+            margin-top: 3px;
+        }
+
+        .hotel-section {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .hotel-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .hotel-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .hotel-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hotel-label {
+            color: #999;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .hotel-value {
+            color: #333;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .hotel-description {
+            color: #666;
+            font-size: 12px;
+            margin-top: 8px;
+            line-height: 1.3;
+            grid-column: 1 / -1;
+        }
+
+        .no-hotel {
+            color: #999;
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        .rating {
+            color: #ffc107;
+            font-weight: 700;
+        }
+
+        .price {
+            color: #28a745;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            color: #999;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Home</a>
+        <h1>🌍 Available Tours</h1>
+        
+        {% if tours %}
+            <div class="tours-grid">
+                {% for tour in tours %}
+                    <div class="tour-card">
+                        <div class="tour-header">
+                            <div class="tour-title">{{ tour.name }}</div>
+                            <div class="tour-id">Tour #{{ tour.id }}</div>
+                        </div>
+
+                        {% if tour.description %}
+                            <div class="tour-description">{{ tour.description }}</div>
+                        {% endif %}
+
+                        <div class="tour-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">Transfer ID</div>
+                                <div class="meta-value">{{ tour.transfer_id or 'N/A' }}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Transport ID</div>
+                                <div class="meta-value">{{ tour.transport_id or 'N/A' }}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Total Cost</div>
+                                <div class="meta-value">
+                                    {% if tour.total_cost %}
+                                        ${{ tour.total_cost }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Hotel ID</div>
+                                <div class="meta-value">{{ tour.hotels_id or 'N/A' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="hotel-section">
+                            <div class="hotel-title">🏨 Hotel Details</div>
+                            {% if tour.hotel %}
+                                <div class="hotel-info">
+                                    <div class="hotel-item">
+                                        <span class="hotel-label">Hotel Name</span>
+                                        <span class="hotel-value">{{ tour.hotel.name }}</span>
+                                    </div>
+                                    <div class="hotel-item">
+                                        <span class="hotel-label">Rating</span>
+                                        <span class="hotel-value rating">
+                                            {% for i in range(tour.hotel.rating) %}⭐{% endfor %} ({{ tour.hotel.rating }}/5)
+                                        </span>
+                                    </div>
+                                    <div class="hotel-item">
+                                        <span class="hotel-label">Location</span>
+                                        <span class="hotel-value">{{ tour.hotel.location }}</span>
+                                    </div>
+                                    <div class="hotel-item">
+                                        <span class="hotel-label">Price/Night</span>
+                                        <span class="hotel-value price">${{ tour.hotel.price }}</span>
+                                    </div>
+                                    {% if tour.hotel.description %}
+                                        <div class="hotel-description">
+                                            <strong>About:</strong> {{ tour.hotel.description }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="no-hotel">No hotel assigned</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No tours available at the moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+</head>

@@ -155,7 +155,15 @@
         <h1>🌍 Tour & Hotel Management</h1>
         <p class="subtitle">Create a new tour with hotel accommodation</p>
 
-        <form id="tourForm">
+        {% if success_show %}
+            <div id="message" class="message success">{{ success }}</div>
+        {% endif %}
+        
+        {% if error_show %}
+            <div id="message" class="message error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/addtour">
             <!-- Tour Information Section -->
             <div class="form-section">
                 <div class="section-title">Tour Information</div>
@@ -237,62 +245,19 @@
                 <button type="submit" class="btn-submit">Submit Tour</button>
                 <button type="reset" class="btn-reset">Clear Form</button>
             </div>
-
-            <!-- Message -->
-            <div id="message" class="message"></div>
         </form>
     </div>
 
     <script>
-        // Handle form submission
-        document.getElementById('tourForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const formData = new FormData(e.target);
-            const tourData = {
-                name: formData.get('name'),
-                description: formData.get('description'),
-                transfer_id: formData.get('transfer_id') ? parseInt(formData.get('transfer_id')) : null,
-                hotels_id: formData.get('hotels_id') ? parseInt(formData.get('hotels_id')) : null,
-                transport_id: formData.get('transport_id') ? parseInt(formData.get('transport_id')) : null,
-                total_cost: formData.get('total_cost') ? parseFloat(formData.get('total_cost')) : null
-            };
-
-            // Validate tour name
-            if (!tourData.name.trim()) {
-                showMessage('Tour name is required', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch('/tours/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(tourData)
-                });
-
-                if (response.ok) {
-                    showMessage('Tour created successfully! 🎉', 'success');
-                    e.target.reset();
-                    setTimeout(() => {
-                        document.getElementById('message').style.display = 'none';
-                    }, 5000);
-                } else {
-                    showMessage('Error creating tour. Please try again.', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage('An error occurred. Please try again.', 'error');
+        // Auto-hide success/error messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const messageDiv = document.getElementById('message');
+            if (messageDiv) {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
             }
         });
-
-        function showMessage(text, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
-        }
     </script>
 </body>
 </html>

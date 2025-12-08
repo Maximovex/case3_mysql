@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class SToursAdd(BaseModel):
     name: str
@@ -16,7 +16,7 @@ class SCustomersAdd(BaseModel):
     name: str
     surname: str
     status: str
-    email: str
+    email: EmailStr
     phone: str
     order_id: int | None = None
 
@@ -37,7 +37,7 @@ class SOrders(SOrdersAdd):
 class SManagersAdd(BaseModel):
     name: str
     surname: str
-    email: str
+    email: EmailStr
     phone: str
 
 class SManagers(SManagersAdd):

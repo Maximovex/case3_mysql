@@ -207,35 +207,63 @@
                             <div class="tour-title">{{ tour.name }}</div>
                             <div class="tour-id">Tour #{{ tour.id }}</div>
                         </div>
+                        <div class="meta-item">
+                                
+                                <div class="hotel-value price">
+                                    <span class="meta-label">Total Cost per person</span>
+                                    <span class="price">$ {{ tour.total_cost  | default('N/A') }} </span> 
+                                    
+                                </div>
+                        </div>
 
                         {% if tour.description %}
                             <div class="tour-description">{{ tour.description }}</div>
                         {% endif %}
 
-                        <div class="tour-meta">
+                        <div class="hotel-section">
+                            
                             <div class="meta-item">
-                                <div class="meta-label">Transfer ID</div>
-                                <div class="meta-value">{{ tour.transfer_id or 'N/A' }}</div>
+                                {% if tour.transport %}
+                                    <div class="transport-section">
+                                        <div class="hotel-title">✈️ Transport Details</div>
+                                        <div class="transport-info">
+                                            <div class="transport-item">
+                                                <span class="meta-label">Company</span>
+                                                <span class="transport-value">{{ tour.transport.company }}</span>
+                                            </div>
+                                           
+                                          
+                                            <div class="transport-item">
+                                                <span class="meta-label">Destination</span>
+                                                <span class="transport-value">{{ tour.transport.from_to or 'N/A' }}</span>
+                                            </div>
+                                            <div class="transport-item">
+                                                <span class="meta-label">Dates</span>
+                                                <span class="transport-value">{{ tour.transport.dates or 'N/A' }}</span>
+                                            </div>
+                                            <div class="transport-item">
+                                                <span class="meta-label">Price</span>
+                                                <span class="transport-value price">${{ tour.transport.price }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
+                        </div>    
+                        
+
+                        <div class="hotel-section">
+                            <div class="hotel-title">Transfer Details</div> 
                             <div class="meta-item">
-                                <div class="meta-label">Transport ID</div>
-                                <div class="meta-value">{{ tour.transport_id or 'N/A' }}</div>
+                                {% if tour.transfer %}
+                                    <div class="meta-label">Transfer Type</div>
+                                    <div class="meta-value">{{ tour.transfer.type or 'N/A' }}</div>
+                                {% endif %}
                             </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Total Cost</div>
-                                <div class="meta-value">
-                                    {% if tour.total_cost %}
-                                        ${{ tour.total_cost }}
-                                    {% else %}
-                                        Not specified
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Hotel ID</div>
-                                <div class="meta-value">{{ tour.hotels_id or 'N/A' }}</div>
-                            </div>
-                        </div>
+                            
+                        </div>   
+                            
+                        
 
                         <div class="hotel-section">
                             <div class="hotel-title">🏨 Hotel Details</div>

@@ -1,34 +1,18 @@
 from fastapi import FastAPI,Depends
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 from schemas import SToursAdd, STours
-from database import Base, Tours, Customers, Orders, Managers, Hotels, Transportations,async_sessionmaker,new_session
+from database import Base, Tours, Customers, Orders, Managers, Hotels, Transportations,Transfers,async_sessionmaker,new_session
 from sqlalchemy import select
-import os
+import uvicorn
 
 templates = Jinja2Templates(directory="templates")
 
 app = FastAPI()
 
-@app.get("/addtour")
-async def read_root(request: Request):
-    async with new_session() as session:
-        hotels = await session.execute(select(Hotels))
-        hotels_list = [
-            {
-                'id': hotel.id,
-                'name': hotel.name,
-                'location': hotel.location,
-                'rating': hotel.rating,
-                'price': hotel.price
-            }
-            for hotel in hotels.scalars().all()
-        ]
-    return templates.TemplateResponse('index.html', {"request": request, "hotels": hotels_list})
 
-@app.get("/tours/")
+
+@app.get("/")
 async def tours_page(request: Request):
     async with new_session() as session:
         tours = await session.execute(select(Tours))
@@ -40,10 +24,9 @@ async def tours_page(request: Request):
                 'id': tour.id,
                 'name': tour.name,
                 'description': tour.description,
-                'transfer_id': tour.transfer_id,
-                'hotels_id': tour.hotels_id,
-                'transport_id': tour.transport_id,
-                'total_cost': tour.total_cost,
+                'transfer':None,
+                'transport':None,
+                'total_cost': None,
                 'hotel': None
             }
             
@@ -60,6 +43,30 @@ async def tours_page(request: Request):
                         'price': hotel.price,
                         'description': hotel.description
                     }
+            # Fetch related transport if transport_id exists
+            if tour.transport_id:
+                transport = await session.execute(select(Transportations).where(Transportations.id == tour.transport_id))
+                transport = transport.scalar_one_or_none()
+                if transport:
+                    tour_dict['transport'] = {
+                        'id': transport.id,
+                        'type': transport.type,
+                        'company': transport.company,
+                        'price': transport.price,
+                        'from_to': transport.from_location + " to " + transport.to_location,
+                        'dates': str(transport.from_date) + " - " + str(transport.to_date)
+                    }
+            # Fetch related transfer if transfer_id exists
+            if tour.transfer_id:
+                transfer = await session.execute(select(Transfers).where(Transfers.id == tour.transfer_id))
+                transfer = transfer.scalar_one_or_none()
+                if transfer:
+                    tour_dict['transfer'] = {
+                        'id': transfer.id,
+                        'type': transfer.type,
+                        'price': transfer.price,
+                    }
+            tour_dict['total_cost'] = sum([hotel.price,transport.price,transfer.price])
             
             result.append(tour_dict)
     
@@ -101,12 +108,68 @@ async def read_hotels():
             result.append(hotel_dict)
     return result
 
-@app.post("/tours-create/")
-async def create_tour(data: SToursAdd=Depends()):
+@app.post("/addtour")
+async def create_tour(request: Request):
+    form_data = await request.form()
+    
+    # Parse form data
+    tour_data = {
+        'name': form_data.get('name'),
+        'description': form_data.get('description') or None,
+        'transfer_id': int(form_data.get('transfer_id')) if form_data.get('transfer_id') else None,
+        'hotels_id': int(form_data.get('hotels_id')) if form_data.get('hotels_id') else None,
+        'transport_id': int(form_data.get('transport_id')) if form_data.get('transport_id') else None,
+        'total_cost': float(form_data.get('total_cost')) if form_data.get('total_cost') else None,
+    }
+    
     async with new_session() as session:
-        tour_dict=data.model_dump()
-        tour = Tours(**tour_dict)
-        session.add(tour)
-        await session.flush()
-        await session.commit()
-    return tour
+        try:
+            # Create tour
+            tour = Tours(**tour_data)
+            session.add(tour)
+            await session.flush()
+            await session.commit()
+            
+            # Fetch hotels for response
+            hotels = await session.execute(select(Hotels))
+            hotels_list = [
+                {
+                    'id': hotel.id,
+                    'name': hotel.name,
+                    'location': hotel.location,
+                    'rating': hotel.rating,
+                    'price': hotel.price
+                }
+                for hotel in hotels.scalars().all()
+            ]
+            
+            return templates.TemplateResponse('index.html', {
+                "request": request, 
+                "hotels": hotels_list,
+                "success": "Tour created successfully! 🎉",
+                "success_show": True
+            })
+        except Exception as e:
+            # Fetch hotels for response
+            hotels = await session.execute(select(Hotels))
+            hotels_list = [
+                {
+                    'id': hotel.id,
+                    'name': hotel.name,
+                    'location': hotel.location,
+                    'rating': hotel.rating,
+                    'price': hotel.price
+                }
+                for hotel in hotels.scalars().all()
+            ]
+            
+            return templates.TemplateResponse('index.html', {
+                "request": request, 
+                "hotels": hotels_list,
+                "error": f"Error creating tour: {str(e)}",
+                "error_show": True
+            })
+        
+if __name__ == "__main__":
+    
+    uvicorn.run("main:app", reload=True)

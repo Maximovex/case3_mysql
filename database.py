@@ -21,10 +21,9 @@ class Tours(Base):
     transfer_id=Column(Integer,ForeignKey('transfer.id'),nullable=True)
     hotels_id=Column(Integer,ForeignKey('hotels.id'),nullable=True)
     transport_id=Column(Integer,ForeignKey('transportations.id'),nullable=True)
-    total_cost=Column(Integer,nullable=True)
-
+    
     def __repr__(self):
-        return f"(id={self.id}, name={self.name}, description={self.description}, transfer_id={self.transfer_id}, hotels_id={self.hotels_id}, transport_id={self.transport_id}, total_cost={self.total_cost})"
+        return f"(id={self.id}, name={self.name}, description={self.description}, transfer_id={self.transfer_id}, hotels_id={self.hotels_id}, transport_id={self.transport_id})"
 
 class Customers(Base):
     __tablename__ = 'customers'
@@ -85,6 +84,14 @@ class Transportations(Base):
     to_location=Column(String(255))
     from_date=Column(String(50))
     to_date=Column(String(50))
+    def __repr__(self):
+        return f"(id={self.id}, type={self.type}, company={self.company}, price={self.price})"
+
+class Transfers(Base):
+    __tablename__ = 'transfers'
+    id=Column(Integer, primary_key=True,index=True)
+    type=Column(String(50))
+    price=Column(Integer)
 
     def __repr__(self):
         return f"(id={self.id}, type={self.type}, company={self.company}, price={self.price})"

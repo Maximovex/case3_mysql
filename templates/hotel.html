@@ -1,0 +1,44 @@
+<html>  
+<head>
+    <title>Hotels</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .hotel-card {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        .hotel-name {
+            font-size: 24px;
+            color: #333;
+        }
+        .hotel-details {
+            margin-top: 10px;
+        }
+        .hotel-details div {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Hotel Details</h1>
+    
+    <div class="hotel-card">
+        <div class="hotel-name">{{ hotel.name }}</div>
+        <div class="hotel-details">
+            <div><strong>Rating:</strong> {{ hotel.rating or 'N/A' }}</div>
+            <div><strong>Address:</strong> {{ hotel.location or 'N/A' }}</div>
+            <div><strong>Price per Night:</strong> ${{ hotel.price or 'N/A' }}</div>
+        </div>
+    </div>
+    
+</body>
+</html>

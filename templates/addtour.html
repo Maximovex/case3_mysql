@@ -189,6 +189,18 @@
                     </select>
                 </div>
 
+                <p style="text-align: center; color: #999; font-size: 12px; margin: 10px 0;">OR add a new transfer</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newTransferType">New Transfer Type</label>
+                        <input type="text" id="newTransferType" name="new_transfer_type" placeholder="e.g., Shuttle">
+                    </div>
+                    <div class="form-group">
+                        <label for="newTransferPrice">New Transfer Price</label>
+                        <input type="number" id="newTransferPrice" name="new_transfer_price" placeholder="0" step="0.01">
+                    </div>
+                </div>
+
                 <!-- Transportation Selection -->
                 <div class="form-group">
                     <label for="transportId">Select Transportation</label>
@@ -198,6 +210,42 @@
                             <option value="{{ transportation.id }}">{{ transportation.company }} ({{ transportation.type }}) - ${{ transportation.price }}</option>
                         {% endfor %}
                     </select>
+                </div>
+
+                <p style="text-align: center; color: #999; font-size: 12px; margin: 10px 0;">OR add new transportation</p>
+                <div class="form-group">
+                    <label for="newTransportCompany">Company</label>
+                    <input type="text" id="newTransportCompany" name="new_transport_company" placeholder="e.g., AirFly">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newTransportType">Type</label>
+                        <input type="text" id="newTransportType" name="new_transport_type" placeholder="e.g., Flight">
+                    </div>
+                    <div class="form-group">
+                        <label for="newTransportPrice">Price</label>
+                        <input type="number" id="newTransportPrice" name="new_transport_price" placeholder="0" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newTransportFrom">From</label>
+                        <input type="text" id="newTransportFrom" name="new_transport_from" placeholder="Origin">
+                    </div>
+                    <div class="form-group">
+                        <label for="newTransportTo">To</label>
+                        <input type="text" id="newTransportTo" name="new_transport_to" placeholder="Destination">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newTransportFromDate">From Date</label>
+                        <input type="text" id="newTransportFromDate" name="new_transport_from_date" placeholder="YYYY-MM-DD">
+                    </div>
+                    <div class="form-group">
+                        <label for="newTransportToDate">To Date</label>
+                        <input type="text" id="newTransportToDate" name="new_transport_to_date" placeholder="YYYY-MM-DD">
+                    </div>
                 </div>
             </div>
 

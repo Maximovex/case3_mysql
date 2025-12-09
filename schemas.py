@@ -1,15 +1,50 @@
 from pydantic import BaseModel, EmailStr
 
+
+
 class SToursAdd(BaseModel):
     name: str
     description: str | None = None
     transfer_id: int | None = None
     hotels_id: int | None = None
     transport_id: int | None = None
-    total_cost: int | None = None
 
 class STours(SToursAdd):
     id: int
+
+
+class STransportAdd(BaseModel):
+    type: str
+    company: str
+    price: int | None = None
+    from_location: str | None = None
+    to_location: str | None = None
+    from_date: str | None = None
+    to_date: str | None = None
+
+class STransport(STransportAdd):
+    id: int
+
+
+class STransferAdd(BaseModel):
+    type: str
+    price: int | None = None
+
+class STransfer(STransferAdd):
+    id: int
+
+
+class SHotelsAdd(BaseModel):
+    name: str
+    location: str
+    rating: int | None = None
+    price: int | None = None
+    description: str | None = None
+
+class SHotels(SHotelsAdd):
+    id: int
+
+
 
 class SCustomersAdd(BaseModel):
     
@@ -18,10 +53,11 @@ class SCustomersAdd(BaseModel):
     status: str
     email: EmailStr
     phone: str
-    order_id: int | None = None
+    
 
 class SCustomers(SCustomersAdd):
     id: int
+
 
 class SOrdersAdd(BaseModel):
     order_date: str
@@ -33,6 +69,7 @@ class SOrdersAdd(BaseModel):
 
 class SOrders(SOrdersAdd):
     id: int
+
 
 class SManagersAdd(BaseModel):
     name: str

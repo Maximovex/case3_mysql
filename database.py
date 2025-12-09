@@ -12,11 +12,11 @@ new_session=async_sessionmaker(engine,expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
-    pass
+    id: Mapped[int] = mapped_column(Integer, primary_key=True,index=True)
 
 class Tours(Base):
     __tablename__ = 'tours'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True,index=True)
+    
     name: Mapped[str] = mapped_column(String(255),nullable=False)
     description: Mapped[Optional[str]]
     transfer_id: Mapped[Optional[int]] = mapped_column(Integer,ForeignKey('transfers.id'))
@@ -28,7 +28,7 @@ class Tours(Base):
 
 class Customers(Base):
     __tablename__ = 'customers'
-    id=Column(Integer, primary_key=True,index=True)
+    
     name=Column(String(255))
     surname=Column(String(255))
     status=Column(String(50))
@@ -41,7 +41,7 @@ class Customers(Base):
 
 class Orders(Base):
     __tablename__ = 'orders'
-    id=Column(Integer, primary_key=True,index=True)
+    
     order_date=Column(String(50))
     customer_id=Column(Integer,ForeignKey('customers.id'))
     tour_id=Column(Integer,ForeignKey('tours.id'))
@@ -54,7 +54,7 @@ class Orders(Base):
 
 class Managers(Base):
     __tablename__ = 'managers'
-    id=Column(Integer, primary_key=True,index=True)
+    
     name=Column(String(255))
     surname=Column(String(255))
     email=Column(String(255))
@@ -65,7 +65,7 @@ class Managers(Base):
 
 class Hotels(Base):
     __tablename__ = 'hotels'
-    id=Column(Integer, primary_key=True,index=True)
+    
     name=Column(String(255))
     location=Column(String(255))
     rating=Column(Integer)
@@ -77,7 +77,7 @@ class Hotels(Base):
     
 class Transportations(Base):
     __tablename__ = 'transportations'
-    id=Column(Integer, primary_key=True,index=True)
+    
     type=Column(String(50))
     company=Column(String(255))
     price=Column(Integer)
@@ -90,7 +90,7 @@ class Transportations(Base):
 
 class Transfers(Base):
     __tablename__ = 'transfers'
-    id=Column(Integer, primary_key=True,index=True)
+    
     type=Column(String(50))
     price=Column(Integer)
 

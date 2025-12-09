@@ -1,7 +1,8 @@
 
 from sqlalchemy.ext.asyncio import async_sessionmaker,create_async_engine,AsyncSession
 from sqlalchemy import Column, Integer, String,ForeignKey
-from sqlalchemy.orm import DeclarativeBase,relationship
+from sqlalchemy.orm import DeclarativeBase,relationship,Mapped,mapped_column
+from typing import Optional,List
 from datetime import datetime
 from settings import MY_DATABASE_URL
 
@@ -15,12 +16,12 @@ class Base(DeclarativeBase):
 
 class Tours(Base):
     __tablename__ = 'tours'
-    id=Column(Integer, primary_key=True,index=True)
-    name=Column(String(255),nullable=False)
-    description=Column(String(1000),nullable=True)
-    transfer_id=Column(Integer,ForeignKey('transfer.id'),nullable=True)
-    hotels_id=Column(Integer,ForeignKey('hotels.id'),nullable=True)
-    transport_id=Column(Integer,ForeignKey('transportations.id'),nullable=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True,index=True)
+    name: Mapped[str] = mapped_column(String(255),nullable=False)
+    description: Mapped[Optional[str]]
+    transfer_id: Mapped[Optional[int]] = mapped_column(Integer,ForeignKey('transfers.id'))
+    hotels_id: Mapped[Optional[int]] = mapped_column(Integer,ForeignKey('hotels.id'))
+    transport_id: Mapped[Optional[int]] = mapped_column(Integer,ForeignKey('transportations.id'))
     
     def __repr__(self):
         return f"(id={self.id}, name={self.name}, description={self.description}, transfer_id={self.transfer_id}, hotels_id={self.hotels_id}, transport_id={self.transport_id})"

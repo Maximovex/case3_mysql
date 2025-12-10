@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Tour - {{ tour.name if tour else 'Tour' }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .form-header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+
+        .form-body {
+            padding: 30px 20px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .readonly-field {
+            background-color: #f8f9fa;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .info-box strong {
+            color: #333;
+        }
+
+        .form-footer {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-footer {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/update-tours/" class="back-link">← Back to Tours List</a>
+
+        {% if tour %}
+            <div class="form-card">
+                <div class="form-header">
+                    <h1>Update Tour</h1>
+                    <p>Tour #{{ tour.id }} - {{ tour.name }}</p>
+                </div>
+
+                <div class="form-body">
+                    {% if success_show %}
+                        <div class="alert alert-success">
+                            ✓ {{ success }}
+                        </div>
+                    {% endif %}
+
+                    {% if error_show %}
+                        <div class="alert alert-error">
+                            ✕ {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" action="/tour/{{ tour.id }}">
+                        <!-- Tour Information Section -->
+                        <div class="form-section">
+                            <h2 class="section-title">Tour Information</h2>
+
+                            <div class="info-box">
+                                <strong>Tour ID:</strong> {{ tour.id }}<br>
+                                <strong>Created/Last Updated:</strong> System managed
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Tour Name *</label>
+                                <input type="text" id="name" name="name" value="{{ tour.name }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" name="description">{{ tour.description or '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Hotel Selection Section -->
+                        <div class="form-section">
+                            <h2 class="section-title">Hotel</h2>
+
+                            <div class="form-group">
+                                <label for="hotels_id">Select Hotel</label>
+                                <select id="hotels_id" name="hotels_id">
+                                    <option value="">-- No Hotel --</option>
+                                    {% for hotel in hotels %}
+                                        <option value="{{ hotel.id }}" {% if tour.hotels_id == hotel.id %}selected{% endif %}>
+                                            {{ hotel.name }} - {{ hotel.location }} (${{ hotel.price }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <a href="/addhotel/" style="display: inline-block; margin-top: 10px; color: #667eea; text-decoration: none; font-weight: 600; font-size: 0.9em;">➕ Add New Hotel</a>
+                            </div>
+
+                            {% if tour.hotel %}
+                                <div class="info-box">
+                                    <strong>Current Hotel:</strong> {{ tour.hotel.name }}<br>
+                                    <strong>Location:</strong> {{ tour.hotel.location }}<br>
+                                    <strong>Rating:</strong> {{ tour.hotel.rating }}/10<br>
+                                    <strong>Price:</strong> ${{ tour.hotel.price }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Transfer Selection Section -->
+                        <div class="form-section">
+                            <h2 class="section-title">Transfer</h2>
+
+                            <div class="form-group">
+                                <label for="transfer_id">Select Existing Transfer</label>
+                                <select id="transfer_id" name="transfer_id">
+                                    <option value="">-- No Transfer --</option>
+                                    {% for transfer in transfers %}
+                                        <option value="{{ transfer.id }}" {% if tour.transfer_id == transfer.id %}selected{% endif %}>
+                                            {{ transfer.type }} - ${{ transfer.price }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="info-box">
+                                Or create a new transfer by filling in the fields below
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new_transfer_type">New Transfer Type</label>
+                                    <input type="text" id="new_transfer_type" name="new_transfer_type" placeholder="e.g., Airport Pickup">
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_transfer_price">New Transfer Price</label>
+                                    <input type="number" id="new_transfer_price" name="new_transfer_price" placeholder="0" min="0">
+                                </div>
+                            </div>
+
+                            {% if tour.transfer %}
+                                <div class="info-box">
+                                    <strong>Current Transfer:</strong> {{ tour.transfer.type }}<br>
+                                    <strong>Price:</strong> ${{ tour.transfer.price }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Transportation Selection Section -->
+                        <div class="form-section">
+                            <h2 class="section-title">Transportation</h2>
+
+                            <div class="form-group">
+                                <label for="transport_id">Select Existing Transportation</label>
+                                <select id="transport_id" name="transport_id">
+                                    <option value="">-- No Transportation --</option>
+                                    {% for transport in transportations %}
+                                        <option value="{{ transport.id }}" {% if tour.transport_id == transport.id %}selected{% endif %}>
+                                            {{ transport.company }} - {{ transport.type }} (${{ transport.price }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="info-box">
+                                Or create a new transportation by filling in the fields below
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new_transport_company">Company</label>
+                                    <input type="text" id="new_transport_company" name="new_transport_company" placeholder="e.g., AirBus Ltd">
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_transport_type">Type</label>
+                                    <input type="text" id="new_transport_type" name="new_transport_type" placeholder="e.g., Flight, Bus">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new_transport_price">Price</label>
+                                    <input type="number" id="new_transport_price" name="new_transport_price" placeholder="0" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_transport_from">From Location</label>
+                                    <input type="text" id="new_transport_from" name="new_transport_from" placeholder="e.g., New York">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new_transport_to">To Location</label>
+                                    <input type="text" id="new_transport_to" name="new_transport_to" placeholder="e.g., Los Angeles">
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_transport_from_date">From Date</label>
+                                    <input type="date" id="new_transport_from_date" name="new_transport_from_date">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new_transport_to_date">To Date</label>
+                                <input type="date" id="new_transport_to_date" name="new_transport_to_date">
+                            </div>
+
+                            {% if tour.transport %}
+                                <div class="info-box">
+                                    <strong>Current Transportation:</strong> {{ tour.transport.company }}<br>
+                                    <strong>Type:</strong> {{ tour.transport.type }}<br>
+                                    <strong>Route:</strong> {{ tour.transport.from_to }}<br>
+                                    <strong>Dates:</strong> {{ tour.transport.dates }}<br>
+                                    <strong>Price:</strong> ${{ tour.transport.price }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Footer -->
+                        <div class="form-footer">
+                            <a href="/update-tours/" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Tour</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="form-card">
+                <div class="form-body" style="text-align: center; padding: 40px;">
+                    <h2 style="color: #dc3545; margin-bottom: 10px;">Tour Not Found</h2>
+                    <p style="color: #666; margin-bottom: 20px;">The tour you're looking for doesn't exist.</p>
+                    <a href="/update-tours/" class="btn btn-primary">Back to Tours List</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

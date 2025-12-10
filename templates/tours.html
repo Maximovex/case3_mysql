@@ -192,11 +192,47 @@
         .back-link:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
+        .cta-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-link {
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            color: #333;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="/" class="back-link">← Back to Home</a>
+        <div class="cta-bar">
+            <a href="/" class="back-link">← Back to Home</a>
+            <div class="cta-buttons">
+                <a href="/login/" class="btn-link">Login</a>
+                <a href="/register/" class="btn-link">Register</a>
+            </div>
+        </div>
         <h1>🌍 Available Tours</h1>
         
         {% if tours %}

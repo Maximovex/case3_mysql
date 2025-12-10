@@ -35,6 +35,7 @@ class Customers(Base):
     email=Column(String(255))
     phone=Column(String(20))
     order_id=Column(Integer,ForeignKey('orders.id'))
+    password:Mapped[str]
 
     def __repr__(self):
         return f"(id={self.id}, name={self.name}, surname={self.surname}, status={self.status}, email={self.email}, phone={self.phone}, order_id={self.order_id})"
@@ -46,8 +47,8 @@ class Orders(Base):
     customer_id=Column(Integer,ForeignKey('customers.id'))
     tour_id=Column(Integer,ForeignKey('tours.id'))
     total_amount=Column(Integer)
-    payment_status=Column(Integer)
-    manager_id=Column(Integer,ForeignKey('managers.id'))
+    payment_status:Mapped[bool]=mapped_column(default=False)
+    manager_id:Mapped[Optional[int]] = mapped_column(Integer,ForeignKey('managers.id'))
 
     def __repr__(self):
         return f"(id={self.id}, order_date={self.order_date}, customer_id={self.customer_id}, tour_id={self.tour_id}, total_amount={self.total_amount}, payment_status={self.payment_status}, manager_id={self.manager_id})"

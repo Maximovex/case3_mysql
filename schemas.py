@@ -53,6 +53,7 @@ class SCustomersAdd(BaseModel):
     status: str
     email: EmailStr
     phone: str
+    password:str
     
 
 class SCustomers(SCustomersAdd):

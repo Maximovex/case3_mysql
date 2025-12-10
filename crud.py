@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from database import Base, Tours, Customers, Orders, Managers, Transfers, Hotels, Transportations, new_session, AsyncSession
-from schemas import SToursAdd, STours, STransportAdd, STransport, STransferAdd, STransfer, SHotelsAdd, SHotels, SCustomersAdd, SCustomers
+from schemas import SToursAdd, STours, STransportAdd, STransport, STransferAdd, STransfer, SHotelsAdd, SHotels, SCustomersAdd, SCustomers, SOrdersAdd
 
 async def get_tours_detailed(new_session_factory: AsyncSession) -> list[dict]:
     """Fetch all tours with related hotel, transfer, and transportation details"""
@@ -116,6 +116,21 @@ async def get_hotels(new_session_factory: AsyncSession) -> list[Hotels]:
         hotels = await session.execute(select(Hotels))
         return hotels.scalars().all()
 
+async def add_customer(customer: SCustomersAdd, new_session_factory: AsyncSession) -> Customers:
+    """Add a new customer to the database"""
+    async with new_session_factory() as session:
+        new_customer = Customers(**customer.model_dump())
+        session.add(new_customer)
+        await session.commit()
+        await session.refresh(new_customer)
+        return new_customer
+
+async def get_customers(new_session_factory: AsyncSession) -> list[Customers]:
+    """Fetch all customers"""
+    async with new_session_factory() as session:
+        customers = await session.execute(select(Customers))
+        return customers.scalars().all()
+
 async def get_tour_by_id(tour_id: int, new_session_factory: AsyncSession) -> dict | None:
     """Fetch a single tour with all related data"""
     async with new_session_factory() as session:
@@ -213,3 +228,70 @@ async def delete_tour(tour_id: int, new_session_factory: AsyncSession) -> bool:
         await session.delete(tour)
         await session.commit()
         return True
+    
+async def add_order(order: SOrdersAdd, session: AsyncSession) -> Orders:
+    """Add a new order to the database"""
+    new_order = Orders(**order.model_dump())
+    session.add(new_order)
+    await session.flush()
+    return new_order
+
+async def get_orders(new_session_factory: AsyncSession) -> list[Orders]:
+    """Fetch all orders"""
+    async with new_session_factory() as session:
+        orders = await session.execute(select(Orders))
+        return orders.scalars().all()  
+    
+async def update_order(order_id: int, order: SOrdersAdd, session: AsyncSession) -> Orders | None:
+    """Update an existing order"""
+    order_obj = await session.execute(select(Orders).where(Orders.id == order_id))
+    order_obj = order_obj.scalar_one_or_none()
+    
+    if not order_obj:
+        return None
+    
+    # Update fields
+    order_obj.order_date = order.order_date
+    order_obj.customer_id = order.customer_id
+    order_obj.tour_id = order.tour_id
+    order_obj.total_amount = order.total_amount
+    order_obj.payment_status = order.payment_status
+    order_obj.manager_id = order.manager_id
+    
+    session.add(order_obj)
+    await session.flush()
+    return order_obj
+
+async def get_customer_by_email_password(email: str, password: str, new_session_factory: AsyncSession) -> dict | None:
+    """Fetch a customer by email and password for login verification"""
+    async with new_session_factory() as session:
+        customer = await session.execute(select(Customers).where(Customers.email == email))
+        customer = customer.scalar_one_or_none()
+        
+        if customer and customer.password == password:
+            return {
+                'id': customer.id,
+                'name': customer.name,
+                'surname': customer.surname,
+                'email': customer.email,
+                'status': customer.status,
+                'phone': customer.phone
+            }
+        return None
+    
+async def get_customer_by_id(customer_id: int, new_session_factory: AsyncSession) -> dict | None:
+    """Fetch a customer by ID"""
+    async with new_session_factory() as session:
+        customer = await session.execute(select(Customers).where(Customers.id == customer_id))
+        customer = customer.scalar_one_or_none()
+        
+        if customer:
+            return {
+                'id': customer.id,
+                'name': customer.name,
+                'surname': customer.surname,
+                'email': customer.email,
+                'status': customer.status,
+                'phone': customer.phone
+            }
+        return None

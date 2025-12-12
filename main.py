@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
@@ -6,13 +6,17 @@ from fastapi.responses import Response
 from database import Tours, Customers, Orders, Managers, Hotels, Transportations,Transfers,new_session
 from sqlalchemy import select
 from crud import get_customer_by_id, get_tours_detailed,add_hotel,add_transport,add_transfer,add_tour,get_hotels,get_transfers,get_transports,get_tour_by_id,update_tour,delete_tour,add_customer,get_customers,add_order,get_customer_by_email_password
+from dependencies import get_hotels_dependency, get_transfers_dependency, get_transports_dependency
 from schemas import SToursAdd, STours, STransportAdd, STransport, STransferAdd, STransfer, SHotelsAdd, SHotels, SCustomersAdd, SCustomers, SOrdersAdd
 import uvicorn
 from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
 
 templates = Jinja2Templates(directory="templates")
 
 app = FastAPI()
+
+
 
 
 
@@ -23,50 +27,22 @@ async def tours_page(request: Request):
     return templates.TemplateResponse('tours.html', {"request": request, "tours": result})
 
 @app.get("/addtour/")
-async def add_tour_page(request: Request):
+async def add_tour_page(
+    request: Request,
+    hotels_list: list[Hotels] = Depends(get_hotels_dependency),
+    transfers_list: list[Transfers] = Depends(get_transfers_dependency),
+    transportations_list: list[Transportations] = Depends(get_transports_dependency)
+):
     """Display the add tour form with available hotels, transfers, and transportations"""
-    hotels_list = await get_hotels(new_session)
-    transfers_list = await get_transfers(new_session)
-    transportations_list = await get_transports(new_session)
     
-    # Convert ORM objects to dictionaries for template
-    hotels_data = [
-        {
-            'id': h.id,
-            'name': h.name,
-            'location': h.location,
-            'rating': h.rating,
-            'price': h.price
-        }
-        for h in hotels_list
-    ]
     
-    transfers_data = [
-        {
-            'id': t.id,
-            'type': t.type,
-            'price': t.price
-        }
-        for t in transfers_list
-    ]
     
-    transportations_data = [
-        {
-            'id': tr.id,
-            'company': tr.company,
-            'type': tr.type,
-            'price': tr.price,
-            'from_location': tr.from_location,
-            'to_location': tr.to_location
-        }
-        for tr in transportations_list
-    ]
-
+   
     return templates.TemplateResponse('addtour.html', {
         "request": request,
-        "hotels": hotels_data,
-        "transfers": transfers_data,
-        "transportations": transportations_data
+        "hotels": hotels_list,
+        "transfers": transfers_list,
+        "transportations": transportations_list
     })
 
 @app.post("/addtour/")
@@ -138,44 +114,15 @@ async def create_tour(request: Request):
             transfers_list = await get_transfers(new_session)
             transportations_list = await get_transports(new_session)
 
-            # Convert to dictionaries
-            hotels_data = [
-                {
-                    'id': h.id,
-                    'name': h.name,
-                    'location': h.location,
-                    'rating': h.rating,
-                    'price': h.price
-                }
-                for h in hotels_list
-            ]
             
-            transfers_data = [
-                {
-                    'id': t.id,
-                    'type': t.type,
-                    'price': t.price
-                }
-                for t in transfers_list
-            ]
             
-            transportations_data = [
-                {
-                    'id': tr.id,
-                    'company': tr.company,
-                    'type': tr.type,
-                    'price': tr.price,
-                    'from_location': tr.from_location,
-                    'to_location': tr.to_location
-                }
-                for tr in transportations_list
-            ]
+            
 
             return templates.TemplateResponse('addtour.html', {
                 "request": request,
-                "hotels": hotels_data,
-                "transfers": transfers_data,
-                "transportations": transportations_data,
+                "hotels": hotels_list,
+                "transfers": transfers_list,
+                "transportations": transportations_list,
                 "success": "Tour created successfully! 🎉",
                 "success_show": True
             })
@@ -187,43 +134,15 @@ async def create_tour(request: Request):
             transfers_list = await get_transfers(new_session)
             transportations_list = await get_transports(new_session)
 
-            hotels_data = [
-                {
-                    'id': h.id,
-                    'name': h.name,
-                    'location': h.location,
-                    'rating': h.rating,
-                    'price': h.price
-                }
-                for h in hotels_list
-            ]
             
-            transfers_data = [
-                {
-                    'id': t.id,
-                    'type': t.type,
-                    'price': t.price
-                }
-                for t in transfers_list
-            ]
             
-            transportations_data = [
-                {
-                    'id': tr.id,
-                    'company': tr.company,
-                    'type': tr.type,
-                    'price': tr.price,
-                    'from_location': tr.from_location,
-                    'to_location': tr.to_location
-                }
-                for tr in transportations_list
-            ]
+            
 
             return templates.TemplateResponse('addtour.html', {
                 "request": request,
-                "hotels": hotels_data,
-                "transfers": transfers_data,
-                "transportations": transportations_data,
+                "hotels": hotels_list,
+                "transfers": transfers_list,
+                "transportations": transportations_list,
                 "error": f"Error creating tour: {str(e)}",
                 "error_show": True
             })
@@ -303,44 +222,14 @@ async def tour_page(request: Request, tour_id: int):
     transportations_list = await get_transports(new_session)
     
     # Convert ORM objects to dictionaries
-    hotels_data = [
-        {
-            'id': h.id,
-            'name': h.name,
-            'location': h.location,
-            'rating': h.rating,
-            'price': h.price
-        }
-        for h in hotels_list
-    ]
-    
-    transfers_data = [
-        {
-            'id': t.id,
-            'type': t.type,
-            'price': t.price
-        }
-        for t in transfers_list
-    ]
-    
-    transportations_data = [
-        {
-            'id': tr.id,
-            'company': tr.company,
-            'type': tr.type,
-            'price': tr.price,
-            'from_location': tr.from_location,
-            'to_location': tr.to_location
-        }
-        for tr in transportations_list
-    ]
+   
     
     return templates.TemplateResponse('tour.html', {
         "request": request,
         "tour": tour,
-        "hotels": hotels_data,
-        "transfers": transfers_data,
-        "transportations": transportations_data
+        "hotels": hotels_list,
+        "transfers": transfers_list,
+        "transportations": transportations_list
     })
 
 @app.post("/tour/{tour_id}")
@@ -413,45 +302,13 @@ async def update_tour_handler(request: Request, tour_id: int):
             transfers_list = await get_transfers(new_session)
             transportations_list = await get_transports(new_session)
 
-            # Convert to dictionaries
-            hotels_data = [
-                {
-                    'id': h.id,
-                    'name': h.name,
-                    'location': h.location,
-                    'rating': h.rating,
-                    'price': h.price
-                }
-                for h in hotels_list
-            ]
-            
-            transfers_data = [
-                {
-                    'id': t.id,
-                    'type': t.type,
-                    'price': t.price
-                }
-                for t in transfers_list
-            ]
-            
-            transportations_data = [
-                {
-                    'id': tr.id,
-                    'company': tr.company,
-                    'type': tr.type,
-                    'price': tr.price,
-                    'from_location': tr.from_location,
-                    'to_location': tr.to_location
-                }
-                for tr in transportations_list
-            ]
 
             return templates.TemplateResponse('tour.html', {
                 "request": request,
                 "tour": tour,
-                "hotels": hotels_data,
-                "transfers": transfers_data,
-                "transportations": transportations_data,
+                "hotels": hotels_list,
+                "transfers": transfers_list,
+                "transportations": transportations_list,
                 "success": "Tour updated successfully! 🎉",
                 "success_show": True
             })
@@ -464,44 +321,14 @@ async def update_tour_handler(request: Request, tour_id: int):
             transfers_list = await get_transfers(new_session)
             transportations_list = await get_transports(new_session)
 
-            hotels_data = [
-                {
-                    'id': h.id,
-                    'name': h.name,
-                    'location': h.location,
-                    'rating': h.rating,
-                    'price': h.price
-                }
-                for h in hotels_list
-            ]
             
-            transfers_data = [
-                {
-                    'id': t.id,
-                    'type': t.type,
-                    'price': t.price
-                }
-                for t in transfers_list
-            ]
-            
-            transportations_data = [
-                {
-                    'id': tr.id,
-                    'company': tr.company,
-                    'type': tr.type,
-                    'price': tr.price,
-                    'from_location': tr.from_location,
-                    'to_location': tr.to_location
-                }
-                for tr in transportations_list
-            ]
 
             return templates.TemplateResponse('tour.html', {
                 "request": request,
                 "tour": tour,
-                "hotels": hotels_data,
-                "transfers": transfers_data,
-                "transportations": transportations_data,
+                "hotels": hotels_list,
+                "transfers": transfers_list,
+                "transportations": transportations_list,
                 "error": f"Error updating tour: {str(e)}",
                 "error_show": True
             })
@@ -695,38 +522,7 @@ async def customer_page(request: Request):
     transfers_list = await get_transfers(new_session)
     transportations_list = await get_transports(new_session)
 
-    hotels_data = [
-        {
-            'id': h.id,
-            'name': h.name,
-            'location': h.location,
-            'rating': h.rating,
-            'price': h.price
-        }
-        for h in hotels_list
-    ]
-
-    transfers_data = [
-        {
-            'id': t.id,
-            'type': t.type,
-            'price': t.price
-        }
-        for t in transfers_list
-    ]
-
-    transportations_data = [
-        {
-            'id': tr.id,
-            'company': tr.company,
-            'type': tr.type,
-            'price': tr.price,
-            'from_location': tr.from_location,
-            'to_location': tr.to_location
-        }
-        for tr in transportations_list
-    ]
-
+    
    
 
     
@@ -735,9 +531,9 @@ async def customer_page(request: Request):
         "request": request,
         "tours": tours_list,
         "selected_tour": selected_tour,
-        "hotels": hotels_data,
-        "transfers": transfers_data,
-        "transportations": transportations_data,
+        "hotels": hotels_list,
+        "transfers": transfers_list,
+        "transportations": transportations_list,
         "selected_tour_id": selected_tour_id,
         "selected_customer":selected_customer
     })
@@ -767,37 +563,7 @@ async def customer_update(request: Request):
         transportations_list = await get_transports(new_session)
         customers_list = await get_customers(new_session)
 
-        hotels_data = [
-            {
-                'id': h.id,
-                'name': h.name,
-                'location': h.location,
-                'rating': h.rating,
-                'price': h.price
-            }
-            for h in hotels_list
-        ]
-
-        transfers_data = [
-            {
-                'id': t.id,
-                'type': t.type,
-                'price': t.price
-            }
-            for t in transfers_list
-        ]
-
-        transportations_data = [
-            {
-                'id': tr.id,
-                'company': tr.company,
-                'type': tr.type,
-                'price': tr.price,
-                'from_location': tr.from_location,
-                'to_location': tr.to_location
-            }
-            for tr in transportations_list
-        ]
+        
 
      
 
@@ -805,9 +571,9 @@ async def customer_update(request: Request):
             "request": request,
             "tours": tours_list,
             "selected_tour": None,
-            "hotels": hotels_data,
-            "transfers": transfers_data,
-            "transportations": transportations_data,
+            "hotels": hotels_list,
+            "transfers": transfers_list,
+            "transportations": transportations_list,
             
             "selected_tour_id": None,
             "selected_customer": selected_customer,
@@ -871,56 +637,16 @@ async def customer_update(request: Request):
     transportations_list = await get_transports(new_session)
     customers_list = await get_customers(new_session)
 
-    hotels_data = [
-        {
-            'id': h.id,
-            'name': h.name,
-            'location': h.location,
-            'rating': h.rating,
-            'price': h.price
-        }
-        for h in hotels_list
-    ]
-
-    transfers_data = [
-        {
-            'id': t.id,
-            'type': t.type,
-            'price': t.price
-        }
-        for t in transfers_list
-    ]
-
-    transportations_data = [
-        {
-            'id': tr.id,
-            'company': tr.company,
-            'type': tr.type,
-            'price': tr.price,
-            'from_location': tr.from_location,
-            'to_location': tr.to_location
-        }
-        for tr in transportations_list
-    ]
-
-    customers_data = [
-        {
-            'id': c.id,
-            'name': c.name,
-            'surname': c.surname,
-            'email': c.email
-        }
-        for c in customers_list
-    ]
+    
+    
 
     return templates.TemplateResponse('customer.html', {
         "request": request,
         "tours": tours_list,
         "selected_tour": selected_tour,
-        "hotels": hotels_data,
-        "transfers": transfers_data,
-        "transportations": transportations_data,
-        "customers": customers_data,
+        "hotels": hotels_list,
+        "transfers": transfers_list,
+        "transportations": transportations_list,
         "selected_tour_id": selected_tour_id,
         "selected_customer": selected_customer,
         "success": success_message,

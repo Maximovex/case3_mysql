@@ -106,8 +106,8 @@ async def add_hotel(hotel: SHotelsAdd, new_session_factory: AsyncSession) -> Hot
     async with new_session_factory() as session:
         new_hotel = Hotels(**hotel.model_dump())
         session.add(new_hotel)
-        await session.commit()
-        await session.refresh(new_hotel)
+        await session.flush()
+        
         return new_hotel
 
 async def get_hotels(new_session_factory: AsyncSession) -> list[Hotels]:

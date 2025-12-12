@@ -48,6 +48,7 @@ import uvicorn
 from datetime import datetime
 from tour.views import router as tour_router
 from hotel.views import router as hotel_router
+from order.views import router as order_router
 from db_helper import db_helper
 
 templates = Jinja2Templates(directory="templates")
@@ -55,6 +56,7 @@ templates = Jinja2Templates(directory="templates")
 app = FastAPI()
 app.include_router(tour_router, prefix="/tour")
 app.include_router(hotel_router, prefix="/hotel")
+app.include_router(order_router, prefix="/order")
 
 @app.get("/")
 async def tours_page(
@@ -65,10 +67,7 @@ async def tours_page(
     return templates.TemplateResponse(        "tours.html", {"request": request, "tours": result})
 
 
-@app.get("/orders/")
-async def read_orders(session: AsyncSession = Depends(db_helper.session_dependency)):
-    orders = await session.execute(select(Orders))
-    return orders.scalars().all()
+
 
 
 @app.get("/customers/")

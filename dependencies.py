@@ -1,16 +1,26 @@
-# Dependency functions for FastAPI
-from crud import get_hotels,get_transfers,get_transports
+from fastapi import Depends
+from crud import get_transfers, get_transports
+from hotel.crud import get_hotels
 from database import Hotels, Transfers, Transportations
-from database import new_session
 
-async def get_hotels_dependency() -> list[Hotels]:
+from sqlalchemy.ext.asyncio import AsyncSession
+from db_helper import db_helper
+
+
+async def get_hotels_dependency(
+    session: AsyncSession = Depends(db_helper.session_dependency),
+) -> list[Hotels]:
     """Dependency to fetch all hotels"""
-    return await get_hotels(new_session)
+    return await get_hotels(session)
 
-async def get_transfers_dependency() -> list[Transfers]:
+async def get_transfers_dependency(
+    session: AsyncSession = Depends(db_helper.session_dependency),
+) -> list[Transfers]:
     """Dependency to fetch all transfers"""
-    return await get_transfers(new_session)
+    return await get_transfers(session)
 
-async def get_transports_dependency() -> list[Transportations]:
+async def get_transports_dependency(
+    session: AsyncSession = Depends(db_helper.session_dependency),
+) -> list[Transportations]:
     """Dependency to fetch all transportations"""
-    return await get_transports(new_session)
+    return await get_transports(session)

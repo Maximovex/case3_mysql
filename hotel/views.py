@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
-
-from fastapi import APIRouter
+from sqlalchemy.ext.asyncio import AsyncSession
+from db_helper import db_helper
+from fastapi import APIRouter, Request, Depends
 from database import (
     Tours,
     Customers,
@@ -11,55 +12,60 @@ from database import (
     Hotels,
     Transportations,
     Transfers,
-    new_session,
+)
+from dependencies import (
+    get_hotels_dependency,
 )
 from sqlalchemy import select
 from hotel.crud import (
-    
     add_hotel,
-   
     get_hotels,
-    
 )
 
 from schemas import (
-    
     SHotelsAdd,
-    
+    SHotels,
 )
-app = FastAPI()
+
+router = APIRouter(tags=["hotel"])
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/hotel/{hotel_id}")
-async def read_hotel(request: Request, hotel_id: int):
-    async with new_session() as session:
-        hotel = await session.execute(select(Hotels).where(Hotels.id == hotel_id))
-        hotel = hotel.scalar_one_or_none()
-        if hotel:
 
-            return templates.TemplateResponse(
-                "hotel.html", {"request": request, "hotel": hotel}
-            )
-        else:
-            return {"error": "Hotel not found"}
+@router.get("/{hotel_id}")
+async def read_hotel(
+    request: Request,
+    hotel_id: int,
+    session: AsyncSession = Depends(db_helper.session_dependency),
+):
+    hotel = await session.execute(select(Hotels).where(Hotels.id == hotel_id))
+    hotel = hotel.scalar_one_or_none()
+    if hotel:
+        return templates.TemplateResponse(
+            "hotel.html", {"request": request, "hotel": hotel}
+        )
+    else:
+        return {"error": "Hotel not found"}
 
 
-@app.get("/hotels/")
-async def read_hotels():
-    async with new_session() as session:
-        hotels = await session.execute(select(Hotels))
-        hotels = hotels.scalars().all()
+@router.get("/", response_model=list[SHotels])
+async def read_hotels(
+    request: Request, hotels: list[SHotels] = Depends(get_hotels_dependency)
+):
+    return templates.TemplateResponse(
+        "hotel.html", {"request": request, "hotels": hotels}
+    )
 
-    return hotels
 
-@app.get("/addhotel/")
+@router.get("/add/")
 async def add_hotel_page(request: Request):
     """Display the add hotel form"""
     return templates.TemplateResponse("addhotel.html", {"request": request})
 
 
-@app.post("/addhotel/")
-async def create_hotel(request: Request):
+@router.post("/add/")
+async def create_hotel(
+    request: Request, session: AsyncSession = Depends(db_helper.session_dependency)
+):
     """Handle hotel creation form submission"""
     from fastapi.responses import RedirectResponse
 
@@ -77,11 +83,18 @@ async def create_hotel(request: Request):
             description=form_data.get("description") or None,
         )
 
-        await add_hotel(hotel_schema, new_session)
+        newhotel = await add_hotel(hotel_schema, session)
+        await session.commit()
 
-        # Redirect back to previous page or tour form
-        referer = request.headers.get("referer", "/")
-        return RedirectResponse(url=referer, status_code=303)
+        # Show success message and allow adding another hotel
+        return templates.TemplateResponse(
+            "addhotel.html",
+            {
+                "request": request,
+                "success": f"Hotel '{newhotel.name}' has been successfully added!",
+                "success_show": True,
+            },
+        )
 
     except Exception as e:
         return templates.TemplateResponse(

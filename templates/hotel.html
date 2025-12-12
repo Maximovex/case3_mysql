@@ -2,11 +2,31 @@
 <head>
     <title>Hotels</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: rgb(72, 26, 164);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgb(248, 246, 246);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgb(245, 242, 242);
         }
         .hotel-card {
             background-color: #fff;
@@ -28,17 +48,30 @@
     </style>
 </head>
 <body>
-
-    <h1>Hotel Details</h1>
-    
-    <div class="hotel-card">
-        <div class="hotel-name">{{ hotel.name }}</div>
-        <div class="hotel-details">
-            <div><strong>Rating:</strong> {{ hotel.rating or 'N/A' }}</div>
-            <div><strong>Address:</strong> {{ hotel.location or 'N/A' }}</div>
-            <div><strong>Price per Night:</strong> ${{ hotel.price or 'N/A' }}</div>
+        <a href="/" class="back-link">← Back to Home</a>
+        {% if hotels %}
+        {% for hotel in hotels %}
+        
+        <div class="hotel-card">
+            <div class="hotel-name">{{ hotel.name }}</div>
+            <div class="hotel-details">
+                <div><strong>Rating:</strong> {{ hotel.rating or 'N/A' }}</div>
+                <div><strong>Address:</strong> {{ hotel.location or 'N/A' }}</div>
+                <div><strong>Price per Night:</strong> ${{ hotel.price or 'N/A' }}</div>
+            </div>
         </div>
-    </div>
-    
+        {% endfor %}
+        {% endif %}
+        {% if hotel %}
+        
+        <div class="hotel-card">
+            <div class="hotel-name">{{ hotel.name }}</div>
+            <div class="hotel-details">
+                <div><strong>Rating:</strong> {{ hotel.rating or 'N/A' }}</div>
+                <div><strong>Address:</strong> {{ hotel.location or 'N/A' }}</div>
+                <div><strong>Price per Night:</strong> ${{ hotel.price or 'N/A' }}</div>
+            </div>
+        </div>
+        {% endif %}
 </body>
 </html>

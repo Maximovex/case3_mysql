@@ -140,7 +140,21 @@
             gap: 10px;
             justify-content: flex-end;
         }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
 
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
         .btn {
             padding: 12px 25px;
             border: none;
@@ -215,7 +229,7 @@
                     </div>
                 {% endif %}
 
-                <form method="POST" action="/addhotel/">
+                <form method="POST" action="/hotel/add/">
                     <div class="form-group">
                         <label for="name">Hotel Name <span class="required">*</span></label>
                         <input type="text" id="name" name="name" required placeholder="e.g., Grand Palace Hotel">

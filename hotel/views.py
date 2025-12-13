@@ -14,7 +14,7 @@ from database import (
     Transfers,
 )
 from dependencies import (
-    get_hotels_dependency,
+    get_hotels_dependency,get_hotel_by_id_dependency,
 )
 from sqlalchemy import select
 from hotel.crud import (
@@ -31,7 +31,7 @@ router = APIRouter(tags=["hotel"])
 templates = Jinja2Templates(directory="templates")
 
 
-@router.get("/{hotel_id}")
+@router.get("/{hotel_id}", response_model=SHotels)
 async def read_hotel(
     request: Request,
     hotel_id: int,
@@ -105,3 +105,38 @@ async def create_hotel(
                 "error_show": True,
             },
         )
+
+@router.patch("/{hotel_id}/update/", response_model=SHotels)
+async def update_hotel(
+    hotel_id: int,
+    hotel_update: SHotelsAdd=Depends(),
+    session: AsyncSession = Depends(db_helper.session_dependency),
+):
+    """Update an existing hotel"""
+    hotel = await get_hotel_by_id_dependency(hotel_id, session)
+    if not hotel:
+        return {"error": "Hotel not found"}
+
+    for key, value in hotel_update.model_dump().items():
+        setattr(hotel, key, value)
+
+    session.add(hotel)
+    await session.commit()
+    await session.refresh(hotel)
+
+    return hotel
+
+@router.delete("/{hotel_id}/delete/")
+async def delete_hotel(
+    hotel_id: int,
+    session: AsyncSession = Depends(db_helper.session_dependency),
+):
+    """Delete a hotel"""
+    hotel = await get_hotel_by_id_dependency(hotel_id, session)
+    if not hotel:
+        return {"error": "Hotel not found"}
+
+    await session.delete(hotel)
+    await session.commit()
+
+    return {"success": f"Hotel with ID {hotel_id} has been deleted."}

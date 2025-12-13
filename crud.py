@@ -21,6 +21,9 @@ from schemas import (
     SCustomersAdd,
     SCustomers,
     SOrdersAdd,
+    SOrders,
+    SManagers,
+    SManagersAdd,
 )
 from db_helper import db_helper
 from fastapi import Depends
@@ -40,10 +43,10 @@ async def add_transport(
 
 async def get_transports(
     session: AsyncSession = Depends(db_helper.session_dependency),
-) -> list[Transportations]:
+) -> list[STransport]:
     """Fetch all transportations"""
     transports = await session.execute(select(Transportations))
-    return transports.scalars().all()
+    return [STransport.model_validate(transport) for transport in transports.scalars().all()]
 
 
 async def add_transfer(
@@ -59,10 +62,10 @@ async def add_transfer(
 
 async def get_transfers(
     session: AsyncSession = Depends(db_helper.session_dependency),
-) -> list[Transfers]:
+) -> list[STransfer]:
     """Fetch all transfers"""
     transfers = await session.execute(select(Transfers))
-    return transfers.scalars().all()
+    return [STransfer.model_validate(transfer) for transfer in transfers.scalars().all()]
 
 
 async def add_customer(
@@ -97,10 +100,10 @@ async def add_order(
 
 async def get_orders(
     session: AsyncSession = Depends(db_helper.session_dependency),
-) -> list[Orders]:
+) -> list[SOrders]:
     """Fetch all orders"""
     orders = await session.execute(select(Orders))
-    return orders.scalars().all()
+    return [SOrders.model_validate(order) for order in orders.scalars().all()]
 
 
 async def update_order(
@@ -132,26 +135,19 @@ async def get_customer_by_email_password(
     email: str,
     password: str,
     session: AsyncSession = Depends(db_helper.session_dependency),
-) -> dict | None:
+) -> SCustomers | None:
     """Fetch a customer by email and password for login verification"""
     customer = await session.execute(select(Customers).where(Customers.email == email))
     customer = customer.scalar_one_or_none()
 
     if customer and customer.password == password:
-        return {
-            "id": customer.id,
-            "name": customer.name,
-            "surname": customer.surname,
-            "email": customer.email,
-            "status": customer.status,
-            "phone": customer.phone,
-        }
+        return SCustomers.model_validate(customer)
     return None
 
 
 async def get_customer_by_id(
     customer_id: int, session: AsyncSession = Depends(db_helper.session_dependency)
-) -> dict | None:
+) -> SCustomers | None:
     """Fetch a customer by ID"""
     customer = await session.execute(
         select(Customers).where(Customers.id == customer_id)
@@ -159,12 +155,5 @@ async def get_customer_by_id(
     customer = customer.scalar_one_or_none()
 
     if customer:
-        return {
-            "id": customer.id,
-            "name": customer.name,
-            "surname": customer.surname,
-            "email": customer.email,
-            "status": customer.status,
-            "phone": customer.phone,
-        }
+       return SCustomers.model_validate(customer)
     return None

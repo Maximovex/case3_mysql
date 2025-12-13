@@ -68,11 +68,12 @@ class SCustomersAdd(BaseModel):
 
 
 class SCustomers(SCustomersAdd):
+    model_config = ConfigDict(from_attributes=True)
     id: int
 
 
 class SOrdersAdd(BaseModel):
-    order_date: str
+    order_date: datetime | None = None
     customer_id: int | None = None
     tour_id: int | None = None
     total_amount: int | None = None
@@ -81,7 +82,11 @@ class SOrdersAdd(BaseModel):
 
 
 class SOrders(SOrdersAdd):
+    model_config = ConfigDict(from_attributes=True)
     id: int
+    customer: SCustomers | None = None
+    tour: STours | None = None
+    manager: SManagers | None = None
 
 
 class SManagersAdd(BaseModel):
@@ -92,4 +97,5 @@ class SManagersAdd(BaseModel):
 
 
 class SManagers(SManagersAdd):
+    model_config = ConfigDict(from_attributes=True)
     id: int

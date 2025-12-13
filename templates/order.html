@@ -179,6 +179,78 @@
         .no-orders p {
             color: #999;
         }
+
+        .expandable-section {
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .expandable-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .expandable-header:hover {
+            background: #e9ecef;
+        }
+
+        .expandable-header .label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .expandable-header .value {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .expand-icon {
+            font-size: 12px;
+            color: #667eea;
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #ffffff;
+        }
+
+        .expandable-content.active {
+            max-height: 500px;
+        }
+
+        .expandable-details {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .expandable-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .expandable-detail-row .label {
+            color: #888;
+        }
+
+        .expandable-detail-row .value {
+            color: #333;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -200,17 +272,143 @@
                     </div>
 
                     <div class="order-body">
+                        <!-- Customer Details Expandable -->
+                        {% if order.customer %}
+                        <div class="expandable-section">
+                            <div class="expandable-header" onclick="toggleExpand(this)">
+                                <div>
+                                    <span class="label">Customer</span>
+                                    <span class="value">{{ order.customer.name }} {{ order.customer.surname }}</span>
+                                </div>
+                                <span class="expand-icon">▼</span>
+                            </div>
+                            <div class="expandable-content">
+                                <div class="expandable-details">
+                                    <div class="expandable-detail-row">
+                                        <span class="label">ID:</span>
+                                        <span class="value">{{ order.customer.id }}</span>
+                                    </div>
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Email:</span>
+                                        <span class="value">{{ order.customer.email }}</span>
+                                    </div>
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Phone:</span>
+                                        <span class="value">{{ order.customer.phone }}</span>
+                                    </div>
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Status:</span>
+                                        <span class="value">{{ order.customer.status }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
                         <div class="order-detail">
                             <span class="detail-label">Customer ID</span>
                             <span class="detail-value">{{ order.customer_id or 'N/A' }}</span>
                         </div>
+                        {% endif %}
 
+                        <!-- Tour Details Expandable -->
+                        {% if order.tour %}
+                        <div class="expandable-section">
+                            <div class="expandable-header" onclick="toggleExpand(this)">
+                                <div>
+
+    <script>
+        function toggleExpand(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.expand-icon');
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('active');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+    </script>
+                                    <span class="label">Tour</span>
+                                    <span class="value">{{ order.tour.name }}</span>
+                                </div>
+                                <span class="expand-icon">▼</span>
+                            </div>
+                            <div class="expandable-content">
+                                <div class="expandable-details">
+                                    <div class="expandable-detail-row">
+                                        <span class="label">ID:</span>
+                                        <span class="value">{{ order.tour.id }}</span>
+                                    </div>
+                                    {% if order.tour.description %}
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Description:</span>
+                                        <span class="value">{{ order.tour.description }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if order.tour.total_cost %}
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Tour Cost:</span>
+                                        <span class="value">${{ order.tour.total_cost }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if order.tour.hotel %}
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Hotel:</span>
+                                        <span class="value">{{ order.tour.hotel.name }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if order.tour.transport %}
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Transport:</span>
+                                        <span class="value">{{ order.tour.transport.type }} - {{ order.tour.transport.company }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if order.tour.transfer %}
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Transfer:</span>
+                                        <span class="value">{{ order.tour.transfer.type }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
                         <div class="order-detail">
                             <span class="detail-label">Tour ID</span>
                             <span class="detail-value">{{ order.tour_id or 'N/A' }}</span>
                         </div>
+                        {% endif %}
 
-                        {% if order.manager_id %}
+                        <!-- Manager Details Expandable -->
+                        {% if order.manager %}
+                        <div class="expandable-section">
+                            <div class="expandable-header" onclick="toggleExpand(this)">
+                                <div>
+                                    <span class="label">Manager</span>
+                                    <span class="value">{{ order.manager.name }} {{ order.manager.surname }}</span>
+                                </div>
+                                <span class="expand-icon">▼</span>
+                            </div>
+                            <div class="expandable-content">
+                                <div class="expandable-details">
+                                    <div class="expandable-detail-row">
+                                        <span class="label">ID:</span>
+                                        <span class="value">{{ order.manager.id }}</span>
+                                    </div>
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Email:</span>
+                                        <span class="value">{{ order.manager.email }}</span>
+                                    </div>
+                                    <div class="expandable-detail-row">
+                                        <span class="label">Phone:</span>
+                                        <span class="value">{{ order.manager.phone }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% elif order.manager_id %}
                         <div class="order-detail">
                             <span class="detail-label">Manager ID</span>
                             <span class="detail-value">{{ order.manager_id }}</span>

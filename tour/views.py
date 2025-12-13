@@ -53,7 +53,7 @@ async def get_tour_page(
     hotels_list: list[Hotels] = Depends(get_hotels_dependency),
     transfers_list: list[Transfers] = Depends(get_transfers_dependency),
     transportations_list: list[Transportations] = Depends(get_transports_dependency),
-    session: AsyncSession = Depends(db_helper.session_dependency),
+    
 ):
     """Display the add tour form with available hotels, transfers, and transportations"""
 

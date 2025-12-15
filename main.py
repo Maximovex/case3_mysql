@@ -49,6 +49,7 @@ from datetime import datetime
 from tour.views import router as tour_router
 from hotel.views import router as hotel_router
 from order.views import router as order_router
+from auth import router as auth_router
 from db_helper import db_helper
 
 templates = Jinja2Templates(directory="templates")
@@ -57,6 +58,7 @@ app = FastAPI()
 app.include_router(tour_router, prefix="/tour")
 app.include_router(hotel_router, prefix="/hotel")
 app.include_router(order_router, prefix="/order")
+app.include_router(auth_router,prefix="/auth")
 
 @app.get("/")
 async def tours_page(

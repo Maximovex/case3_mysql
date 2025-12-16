@@ -67,6 +67,13 @@ async def get_transfers(
     transfers = await session.execute(select(Transfers))
     return [STransfer.model_validate(transfer) for transfer in transfers.scalars().all()]
 
+async def get_transfers_by_id(
+        transfer_id:int, 
+        session:AsyncSession=Depends(db_helper.session_dependency),        
+)->STransfer:
+    transfer_by_id=await session.execute(select(Transfers).where(Transfers.id==transfer_id))
+    transfer_by_id=transfer_by_id.scalar_one_or_none()
+    return STransfer.model_validate(transfer_by_id)
 
 async def add_customer(
     customer: SCustomersAdd,

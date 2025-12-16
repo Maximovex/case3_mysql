@@ -9,6 +9,7 @@ from database import (
     Hotels,
     Transportations,
 )
+from crud import get_transfers_by_id
 from schemas import (
     SToursAdd,
     STours,
@@ -52,12 +53,8 @@ async def get_tours_detailed(
 
         # Fetch and add transfer details if transfer_id exists
         if tour.transfer_id:
-            transfer = await session.execute(
-                select(Transfers).where(Transfers.id == tour.transfer_id)
-            )
-            transfer = transfer.scalar_one_or_none()
-            if transfer:
-                tour_schema.transfer = STransfer.model_validate(transfer)
+            transfer = await get_transfers_by_id(tour.transfer_id, session)
+            tour_schema.transfer = STransfer.model_validate(transfer)
 
         # Fetch and add transport details if transport_id exists
         if tour.transport_id:
@@ -94,11 +91,12 @@ async def update_tour(
         return None
 
     # Update fields
-    tour_obj.name = tour.name
-    tour_obj.description = tour.description
-    tour_obj.transfer_id = tour.transfer_id
-    tour_obj.hotels_id = tour.hotels_id
-    tour_obj.transport_id = tour.transport_id
+    tour_obj=Tours(**tour.model_dump())
+    # tour_obj.name = tour.name
+    # tour_obj.description = tour.description
+    # tour_obj.transfer_id = tour.transfer_id
+    # tour_obj.hotels_id = tour.hotels_id
+    # tour_obj.transport_id = tour.transport_id
 
     session.add(tour_obj)
     await session.flush()
@@ -122,39 +120,21 @@ async def delete_tour(
 
 async def get_tour_by_id(
     tour_id: int, session: AsyncSession = Depends(db_helper.session_dependency)
-) -> dict | None:
+) -> STours | None:
     """Fetch a single tour with all related data"""
     tour = await session.execute(select(Tours).where(Tours.id == tour_id))
     tour = tour.scalar_one_or_none()
 
     if not tour:
         return None
-
-    tour_dict = {
-        "id": tour.id,
-        "name": tour.name,
-        "description": tour.description,
-        "hotels_id": tour.hotels_id,
-        "transfer_id": tour.transfer_id,
-        "transport_id": tour.transport_id,
-        "transfer": None,
-        "transport": None,
-        "hotel": None,
-    }
+    tour_schema = STours.model_validate(tour)
 
     # Fetch related hotel
     if tour.hotels_id:
         hotel = await session.execute(select(Hotels).where(Hotels.id == tour.hotels_id))
         hotel = hotel.scalar_one_or_none()
         if hotel:
-            tour_dict["hotel"] = {
-                "id": hotel.id,
-                "name": hotel.name,
-                "location": hotel.location,
-                "rating": hotel.rating,
-                "price": hotel.price,
-                "description": hotel.description,
-            }
+            tour_schema.hotel = SHotels.model_validate(hotel)
 
     # Fetch related transport
     if tour.transport_id:
@@ -163,18 +143,7 @@ async def get_tour_by_id(
         )
         transport = transport.scalar_one_or_none()
         if transport:
-            tour_dict["transport"] = {
-                "id": transport.id,
-                "type": transport.type,
-                "company": transport.company,
-                "price": transport.price,
-                "from_location": transport.from_location,
-                "to_location": transport.to_location,
-                "from_date": transport.from_date,
-                "to_date": transport.to_date,
-                "from_to": f"{transport.from_location} to {transport.to_location}",
-                "dates": f"{transport.from_date} - {transport.to_date}",
-            }
+            tour_schema.transport = STransport.model_validate(transport)
 
     # Fetch related transfer
     if tour.transfer_id:
@@ -183,13 +152,9 @@ async def get_tour_by_id(
         )
         transfer = transfer.scalar_one_or_none()
         if transfer:
-            tour_dict["transfer"] = {
-                "id": transfer.id,
-                "type": transfer.type,
-                "price": transfer.price,
-            }
+            tour_schema.transfer = STransfer.model_validate(transfer)
 
-    return tour_dict
+    return tour_schema
 
 
 async def add_tour(
@@ -200,3 +165,5 @@ async def add_tour(
     session.add(new_tour)
     await session.flush()
     return new_tour
+
+

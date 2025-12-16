@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request,Form
 from fastapi.templating import Jinja2Templates
 from crud import add_transfer, add_transport, get_transfers, get_transports
 from db_helper import db_helper
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Annotated
 
 from database import (
     Tours,
@@ -69,71 +70,44 @@ async def get_tour_page(
 
 
 @router.post("/",response_model=STours)
-async def create_tour(request: Request, session: AsyncSession = Depends(db_helper.session_dependency)):
+async def create_tour(request: Request,transport_schema: Annotated[STransportAdd, Form()], tour_schema: Annotated[SToursAdd, Form()], session: AsyncSession = Depends(db_helper.session_dependency)):
     """Handle form submission to create a new tour. Allows creating transfer/transportation on the fly."""
     form_data = await request.form()
 
     def to_int(val):
         return int(val) if val not in (None, "") else None
-
+   
     # Existing selections (ids) if chosen
     transfer_id = to_int(form_data.get("transfer_id"))
     transport_id = to_int(form_data.get("transport_id"))
 
     # New transfer fields
-    new_transfer_type = (form_data.get("new_transfer_type") or "").strip()
-    new_transfer_price = to_int(form_data.get("new_transfer_price"))
+    
+    transfer_schema=STransferAdd(
+            type=form_data.get("new_transfer_type"),
+            price=to_int(form_data.get("new_transfer_price"))
+            )
 
-    # New transportation fields
-    new_transport_company = (form_data.get("new_transport_company") or "").strip()
-    new_transport_type = (form_data.get("new_transport_type") or "").strip()
-    new_transport_price = to_int(form_data.get("new_transport_price"))
-    new_transport_from = (form_data.get("new_transport_from") or "").strip()
-    new_transport_to = (form_data.get("new_transport_to") or "").strip()
-    new_transport_from_date = (form_data.get("new_transport_from_date") or "").strip()
-    new_transport_to_date = (form_data.get("new_transport_to_date") or "").strip()
+    
 
     try:
         # Create transfer if no id provided but new data given
-        if not transfer_id and (
-            new_transfer_type or new_transfer_price is not None
-        ):
-            transfer_schema = STransferAdd(
-                type=new_transfer_type or "Unknown", price=new_transfer_price
-            )
+        if not transfer_id and transfer_schema:
+            
             created_transfer = await add_transfer(transfer_schema, session)
             transfer_id = created_transfer.id
 
         # Create transportation if no id provided but new data given
-        if not transport_id and (
-            new_transport_company
-            or new_transport_type
-            or new_transport_price is not None
-            or new_transport_from
-            or new_transport_to
-            or new_transport_from_date
-            or new_transport_to_date
-        ):
-            transport_schema = STransportAdd(
-                company=new_transport_company or "Unknown",
-                type=new_transport_type or "Unknown",
-                price=new_transport_price,
-                from_location=new_transport_from or None,
-                to_location=new_transport_to or None,
-                from_date=new_transport_from_date or None,
-                to_date=new_transport_to_date or None,
-            )
+        if not transport_id and transport_schema:
+            
+            
             created_transport = await add_transport(transport_schema, session)
             transport_id = created_transport.id
 
         # Create tour using schema
-        tour_schema = SToursAdd(
-            name=form_data.get("name"),
-            description=form_data.get("description") or None,
-            transfer_id=transfer_id,
-            hotels_id=to_int(form_data.get("hotels_id")),
-            transport_id=transport_id,
-        )
+        
+        tour_schema.transfer_id=transfer_id
+        tour_schema.transport_id=transport_id
         await add_tour(tour_schema, session)
         await session.commit()
 
@@ -211,7 +185,7 @@ async def tour_page(request: Request, tour_id: int, session: AsyncSession = Depe
 
 
 @router.patch("/{tour_id}",response_model=STours)
-async def update_tour_handler(request: Request, tour_id: int,session: AsyncSession = Depends(db_helper.session_dependency)):
+async def update_tour_handler(request: Request, tour_schema: Annotated[SToursAdd, Form()], tour_id: int,transport_schema: Annotated[STransportAdd, Form()], session: AsyncSession = Depends(db_helper.session_dependency)):
     """Handle tour update form submission"""
     form_data = await request.form()
 
@@ -223,59 +197,30 @@ async def update_tour_handler(request: Request, tour_id: int,session: AsyncSessi
     transport_id = to_int(form_data.get("transport_id"))
 
     # New transfer fields
-    new_transfer_type = (form_data.get("new_transfer_type") or "").strip()
-    new_transfer_price = to_int(form_data.get("new_transfer_price"))
+    transfer_schema=STransferAdd(
+            type=form_data.get("new_transfer_type"),
+            price=to_int(form_data.get("new_transfer_price"))
+            )
 
     # New transportation fields
-    new_transport_company = (form_data.get("new_transport_company") or "").strip()
-    new_transport_type = (form_data.get("new_transport_type") or "").strip()
-    new_transport_price = to_int(form_data.get("new_transport_price"))
-    new_transport_from = (form_data.get("new_transport_from") or "").strip()
-    new_transport_to = (form_data.get("new_transport_to") or "").strip()
-    new_transport_from_date = (form_data.get("new_transport_from_date") or "").strip()
-    new_transport_to_date = (form_data.get("new_transport_to_date") or "").strip()
+    
 
     try:
         # Create transfer if no id provided but new data given
-        if not transfer_id and (
-            new_transfer_type or new_transfer_price is not None
-        ):
-            transfer_schema = STransferAdd(
-                type=new_transfer_type or "Unknown", price=new_transfer_price
-            )
+        if not transfer_id and transfer_schema:
+            
             created_transfer = await add_transfer(transfer_schema, session)
             transfer_id = created_transfer.id
 
         # Create transportation if no id provided but new data given
-        if not transport_id and (
-            new_transport_company
-            or new_transport_type
-            or new_transport_price is not None
-            or new_transport_from
-            or new_transport_to
-            or new_transport_from_date
-            or new_transport_to_date
-        ):
-            transport_schema = STransportAdd(
-                company=new_transport_company or "Unknown",
-                type=new_transport_type or "Unknown",
-                price=new_transport_price,
-                from_location=new_transport_from or None,
-                to_location=new_transport_to or None,
-                from_date=new_transport_from_date or None,
-                to_date=new_transport_to_date or None,
-            )
+        if not transport_id and transport_schema:
+        
             created_transport = await add_transport(transport_schema, session)
             transport_id = created_transport.id
 
         # Update tour using schema
-        tour_schema = SToursAdd(
-            name=form_data.get("name"),
-            description=form_data.get("description") or None,
-            transfer_id=transfer_id,
-            hotels_id=to_int(form_data.get("hotels_id")),
-            transport_id=transport_id,
-        )
+        tour_schema.transfer_id=transfer_id
+        tour_schema.transport_id=transport_id
         await update_tour(tour_id, tour_schema, session)
         await session.commit()
 

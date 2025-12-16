@@ -1,0 +1,13 @@
+SQL/dump-world_travel-202512151748.sql
+SQL/world_travel.png
+SQL/*.*
+__pycache__/*.*
+__pycache__
+__pycache__/main.cpython-314.pyc
+tour/__pycache__/crud.cpython-314.pyc
+tour/__pycache__/views.cpython-314.pyc
+tour/__pycache__/crud.cpython-314.pyc
+tour/__pycache__/views.cpython-314.pyc
+auth/__pycache__/__init__.cpython-314.pyc
+__pycache__/crud.cpython-314.pyc
+__pycache__/main.cpython-314.pyc

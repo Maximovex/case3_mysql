@@ -92,11 +92,7 @@ async def update_tour(
 
     # Update fields
     tour_obj=Tours(**tour.model_dump())
-    # tour_obj.name = tour.name
-    # tour_obj.description = tour.description
-    # tour_obj.transfer_id = tour.transfer_id
-    # tour_obj.hotels_id = tour.hotels_id
-    # tour_obj.transport_id = tour.transport_id
+  
 
     session.add(tour_obj)
     await session.flush()

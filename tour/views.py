@@ -31,12 +31,15 @@ from dependencies import (
 from schemas import (
     SToursAdd,
     STours,
+    SToursUpdate,
     STransportAdd,
     STransferAdd,
     SHotelsAdd,
     SCustomersAdd,
     SOrdersAdd,
+    STransportUpdate,
 )
+from tour.dependency import get_tour_by_id_dependency
 
 templates = Jinja2Templates(directory="templates")
 
@@ -175,7 +178,6 @@ async def tour_page(
     transfers_list = await get_transfers(session)
     transportations_list = await get_transports(session)
 
-    # Convert ORM objects to dictionaries
 
     return templates.TemplateResponse(
         "tour.html",
@@ -188,92 +190,94 @@ async def tour_page(
         },
     )
 
-
+@router.post("/{tour_id}")
 @router.patch("/{tour_id}")
 async def update_tour_handler(
     request: Request,
-    tour_schema: Annotated[SToursAdd, Form()],
-    tour_id: int,
-    transport_schema: Annotated[STransportAdd, Form()],
+    tour_schema: Annotated[SToursUpdate, Form()],
+    
+    
+    tour=Depends(get_tour_by_id_dependency),
     session: AsyncSession = Depends(db_helper.session_dependency),
 ):
-    """Handle tour update form submission"""
-    form_data = await request.form()
+    # """Handle tour update form submission"""
+    # form_data = await request.form()
 
-    def to_int(val):
-        return int(val) if val not in (None, "") else None
+    # def to_int(val):
+    #     return int(val) if val not in (None, "") else None
 
-    # Get existing selection ids
-    transfer_id = to_int(form_data.get("transfer_id"))
-    transport_id = to_int(form_data.get("transport_id"))
+    # # Get existing selection ids
+    # transfer_id = to_int(form_data.get("transfer_id"))
+    # transport_id = to_int(form_data.get("transport_id"))
 
-    # New transfer fields
-    transfer_schema = STransferAdd(
-        type=form_data.get("new_transfer_type"),
-        price=to_int(form_data.get("new_transfer_price")),
-    )
+    # # New transfer fields
+    # transfer_schema = STransferAdd(
+    #     type=form_data.get("new_transfer_type"),
+    #     price=to_int(form_data.get("new_transfer_price")),
+    # )
 
-    # New transportation fields
+    # # New transportation fields
 
-    try:
-        # Create transfer if no id provided but new data given
-        if not transfer_id and transfer_schema:
+    # try:
+    #     # Create transfer if no id provided but new data given
+    #     if not transfer_id and transfer_schema:
 
-            created_transfer = await add_transfer(transfer_schema, session)
-            transfer_id = created_transfer.id
+    #         created_transfer = await add_transfer(transfer_schema, session)
+    #         transfer_id = created_transfer.id
 
-        # Create transportation if no id provided but new data given
-        if not transport_id and transport_schema:
+    #     # Create transportation if no id provided but new data given
+    #     if not transport_id and transport_schema:
 
-            created_transport = await add_transport(transport_schema, session)
-            transport_id = created_transport.id
+    #         created_transport = await add_transport(transport_schema, session)
+    #         transport_id = created_transport.id
 
-        # Update tour using schema
-        tour_schema.transfer_id = transfer_id
-        tour_schema.transport_id = transport_id
-        await update_tour(tour_id, tour_schema, session)
-        await session.commit()
+    #     # Update tour using schema
+    #     tour_schema.transfer_id = transfer_id
+    #     tour_schema.transport_id = transport_id
+    #     await update_tour(tour_id, tour_schema, session)
+    #     await session.commit()
 
-        # Fetch updated tour data
-        tour = await get_tour_by_id(tour_id, session)
-        hotels_list = await get_hotels(session)
-        transfers_list = await get_transfers(session)
-        transportations_list = await get_transports(session)
+    #     # Fetch updated tour data
+    #     tour = await get_tour_by_id(tour_id, session)
+    #     hotels_list = await get_hotels(session)
+    #     transfers_list = await get_transfers(session)
+    #     transportations_list = await get_transports(session)
 
-        return templates.TemplateResponse(
-            "tour.html",
-            {
-                "request": request,
-                "tour": tour,
-                "hotels": hotels_list,
-                "transfers": transfers_list,
-                "transportations": transportations_list,
-                "success": "Tour updated successfully! 🎉",
-                "success_show": True,
-            },
-        )
-    except Exception as e:
-        await session.rollback()
+    #     return tour_schema
+    #     """templates.TemplateResponse(
+    #         "tour.html",
+    #         {
+    #             "request": request,
+    #             "tour": tour,
+    #             "hotels": hotels_list,
+    #             "transfers": transfers_list,
+    #             "transportations": transportations_list,
+    #             "success": "Tour updated successfully! 🎉",
+    #             "success_show": True,
+    #         },
+    #     )"""
+    # except Exception as e:
+    #     await session.rollback()
 
-        # Fetch tour data for error response
-        tour = await get_tour_by_id(tour_id, session)
-        hotels_list = await get_hotels(session)
-        transfers_list = await get_transfers(session)
-        transportations_list = await get_transports(session)
+    #     # Fetch tour data for error response
+    #     tour = await get_tour_by_id(tour_id, session)
+    #     hotels_list = await get_hotels(session)
+    #     transfers_list = await get_transfers(session)
+    #     transportations_list = await get_transports(session)
 
-        return templates.TemplateResponse(
-            "tour.html",
-            {
-                "request": request,
-                "tour": tour,
-                "hotels": hotels_list,
-                "transfers": transfers_list,
-                "transportations": transportations_list,
-                "error": f"Error updating tour: {str(e)}",
-                "error_show": True,
-            },
-        )
-
+    #     return templates.TemplateResponse(
+    #         "tour.html",
+    #         {
+    #             "request": request,
+    #             "tour": tour,
+    #             "hotels": hotels_list,
+    #             "transfers": transfers_list,
+    #             "transportations": transportations_list,
+    #             "error": f"Error updating tour: {str(e)}",
+    #             "error_show": True,
+    #         },
+    #     )
+    return await update_tour(tour_schema,tour,session)
 
 @router.delete("/{tour_id}/delete")
 async def delete_tour_handler(

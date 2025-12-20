@@ -1,4 +1,5 @@
-from fastapi import Depends
+from typing import Annotated
+from fastapi import Depends, HTTPException, Path,status
 from crud import get_transfers, get_transports
 from tour.crud import get_tours_detailed
 from hotel.crud import get_hotels
@@ -62,3 +63,4 @@ async def get_manager_by_id_dependency(
 ) -> SManagers | None:
     """Dependency to fetch a manager by ID"""
     return await get_manager_by_id(manager_id, session)
+

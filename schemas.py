@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 
@@ -18,6 +19,12 @@ class STours(SToursAdd):
     transport: STransport | None = None
     total_cost: int | None = None
 
+class SToursUpdate(BaseModel):
+    name: Optional[str]
+    description: Optional[str] | None = None
+    transfer_id: Optional[int] | None = None
+    hotels_id: Optional[int] | None = None
+    transport_id: Optional[int] | None = None
 
 class STransportAdd(BaseModel):
     type: str | None = None
@@ -33,6 +40,15 @@ class STransport(STransportAdd):
     model_config = ConfigDict(from_attributes=True)
     id: int
 
+class STransportUpdate(STransportAdd):
+    
+    type: Optional[str] = None
+    company: Optional[str] = None
+    price: Optional[int] = None
+    from_location: Optional[str] = None
+    to_location: Optional[str] = None
+    from_date: Optional[datetime] = None
+    to_date: Optional[datetime] = None
 
 class STransferAdd(BaseModel):
     type: str

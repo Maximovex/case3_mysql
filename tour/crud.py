@@ -10,9 +10,11 @@ from database import (
     Transportations,
 )
 from crud import get_transfers_by_id
+from .dependency import get_tour_by_id_dependency
 from schemas import (
     SToursAdd,
     STours,
+    SToursUpdate,
     STransportAdd,
     STransport,
     STransferAdd,
@@ -79,23 +81,23 @@ async def get_tours_detailed(
 
 
 async def update_tour(
-    tour_id: int,
-    tour: SToursAdd,
+    tour: SToursUpdate,
+    tour_obj=Depends(get_tour_by_id_dependency),
     session: AsyncSession = Depends(db_helper.session_dependency),
 ) -> Tours | None:
     """Update an existing tour"""
-    tour_obj = await session.execute(select(Tours).where(Tours.id == tour_id))
-    tour_obj = tour_obj.scalar_one_or_none()
-
+    
     if not tour_obj:
         return None
 
-    # Update fields
-    tour_obj=Tours(**tour.model_dump())
+    
+    for key, value in tour.model_dump(exclude_unset=True).items():
+        setattr(tour_obj, key, value)
   
 
-    session.add(tour_obj)
+    
     await session.flush()
+    await session.commit()
     return tour_obj
 
 
